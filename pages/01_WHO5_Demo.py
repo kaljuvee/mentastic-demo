@@ -15,9 +15,13 @@ def who5_survey_interaction(user_input, user_id, session_id):
     response = requests.post(endpoint, json=data)
     return response.json()
 
-# Streamlit UI
-st.title("Mentastic AI WHO-5 Survey Interaction")
+st.markdown("""
+## Mentastic AI WHO-5 Demo
 
+### Instructions
+- You will be prompted to answer WHO5 standard questions.
+- Answer to each question on the scale provided.
+""")
 # Hide user and session IDs
 user_id = "user123"
 session_id = "session456"

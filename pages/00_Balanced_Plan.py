@@ -11,8 +11,13 @@ def get_questions(language="en"):
     response = requests.get(endpoint, params=params)
     return response.json()
 
-# Streamlit UI
-st.title("Mentastic AI Retrieve Questions")
+st.markdown("""
+## Mentastic AI Mental Wellbeing Balanced Plan Demo
+
+### Instructions
+- You will be prompted to answer a series of questions.
+- Answer to each question on the format provided.
+""")
 
 # Hide user and session IDs
 user_id = "user123"
