@@ -76,7 +76,7 @@ st.progress(progress)
 # Reset button for questionnaire
 if st.button("Refresh questions"):
     st.session_state.current_question = 0
-    st.experimental_rerun()
+    st.rerun()
 
 # Display chat history
 display_chat_history()
