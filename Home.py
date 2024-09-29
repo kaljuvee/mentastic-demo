@@ -1,14 +1,11 @@
 import streamlit as st
 import requests
 import json
+import uuid
 
 BASE_URL = "https://mentasticappserviceai.azurewebsites.net"
 CONVERSATION_BLOB_URL = "https://mentasticstorageai.blob.core.windows.net/prompt-data/conversation.txt"
 WHO5_BLOB_URL = "https://mentasticstorageai.blob.core.windows.net/prompt-data/who-questions.txt"
-
-# Hide user and session IDs for simplicity
-user_id = "user123"
-session_id = "session456"
 
 # Function to interact with the chatbot
 def chatbot_interaction(user_input, user_id, session_id):
@@ -26,6 +23,10 @@ if 'messages' not in st.session_state:
     st.session_state.messages = []
 if 'current_message' not in st.session_state:
     st.session_state.current_message = ""
+if 'user_id' not in st.session_state:
+    st.session_state.user_id = None
+if 'session_id' not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())
 
 def display_chat_history():
     for message in st.session_state.messages:
@@ -40,7 +41,7 @@ def send_message():
         st.session_state.messages.append({"type": "user", "content": st.session_state.current_message})
         
         # Get response from chatbot
-        response = chatbot_interaction(st.session_state.current_message, user_id, session_id)
+        response = chatbot_interaction(st.session_state.current_message, st.session_state.user_id, st.session_state.session_id)
         
         # Extract and add model's response to chat history
         model_response = response.get("interpreted_response", "Sorry, I couldn't process that.")
@@ -52,42 +53,60 @@ def send_message():
 # Main Streamlit App Layout
 st.title("Mentastic AI Demo")
 
-# Create three columns for sample questions
-col1, col2, col3 = st.columns(3)
+if st.session_state.user_id is None:
+    email = st.text_input("Please enter your email to start:")
+    if st.button("Start Chat"):
+        if email:
+            st.session_state.user_id = email
+            st.rerun()
+        else:
+            st.error("Please enter a valid email address.")
+else:
+    # Create three columns for sample questions
+    col1, col2, col3 = st.columns(3)
 
-# Sample questions in each column
-with col1:
-    if st.button("How would I manage my stress?"):
-        st.session_state.current_message = "How would I manage my stress?"
+    # Sample questions in each column
+    with col1:
+        if st.button("How would I manage my stress?"):
+            st.session_state.current_message = "How would I manage my stress?"
+            send_message()
+
+    with col2:
+        if st.button("Help me understand why I feel tired."):
+            st.session_state.current_message = "Help me understand why I feel tired."
+            send_message()
+
+    with col3:
+        if st.button("I often feel lonely, can you help me to solve that?"):
+            st.session_state.current_message = "I often feel lonely, can you help me to solve that?"
+            send_message()
+
+    # Display chat history
+    display_chat_history()
+
+    # Get user input
+    user_input = st.text_input("Your question / reply:", key="user_input", value=st.session_state.current_message)
+
+    # Update current_message in session state when input changes
+    if user_input != st.session_state.current_message:
+        st.session_state.current_message = user_input
+
+    # Send button
+    if st.button("Send"):
         send_message()
+        st.rerun()
 
-with col2:
-    if st.button("Help me understand why I feel tired."):
-        st.session_state.current_message = "Help me understand why I feel tired."
-        send_message()
+    # Refresh button
+    if st.button("Refresh"):
+        st.session_state.messages = []
+        st.session_state.current_message = ""
+        st.session_state.session_id = str(uuid.uuid4())  # Generate a new session_id on refresh
+        st.rerun()
 
-with col3:
-    if st.button("I often feel lonely, can you help me to solve that?"):
-        st.session_state.current_message = "I often feel lonely, can you help me to solve that?"
-        send_message()
-
-# Display chat history
-display_chat_history()
-
-# Get user input
-user_input = st.text_input("Your question / reply:", key="user_input", value=st.session_state.current_message)
-
-# Update current_message in session state when input changes
-if user_input != st.session_state.current_message:
-    st.session_state.current_message = user_input
-
-# Send button
-if st.button("Send"):
-    send_message()
-    st.rerun()
-
-# Refresh button
-if st.button("Refresh"):
-    st.session_state.messages = []
-    st.session_state.current_message = ""
-    st.rerun()
+    # Add a logout button
+    if st.button("Logout"):
+        st.session_state.user_id = None
+        st.session_state.session_id = str(uuid.uuid4())
+        st.session_state.messages = []
+        st.session_state.current_message = ""
+        st.rerun()
