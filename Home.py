@@ -58,7 +58,7 @@ if 'answers' not in st.session_state:
     st.session_state.answers = {}
 
 # Main Streamlit App Layout
-st.title("Mentastic AI Demo")
+st.title("Mentastic AI")
 
 if st.session_state.user_id is None:
     email = st.text_input("Please enter your email to start:")
